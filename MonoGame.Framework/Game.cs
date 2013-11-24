@@ -495,6 +495,9 @@ namespace Microsoft.Xna.Framework
             // any change fully in both the fixed and variable timestep 
             // modes across multiple devices and platforms.
 
+            // Can only be running slow if we are fixed timestep
+            var possibleToBeRunningSlowly = IsFixedTimeStep;
+
         RetryTick:
 
             // Advance the accumulated elapsed time.
@@ -508,6 +511,10 @@ namespace Microsoft.Xna.Framework
             if (IsFixedTimeStep && _accumulatedElapsedTime < TargetElapsedTime)
             {
                 var sleepTime = (int)(TargetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
+
+                // If we have had to sleep, we shouldn't report being
+                // slow regardless of how long we actually sleep for.
+                possibleToBeRunningSlowly = false;
 
                 // NOTE: While sleep can be inaccurate in general it is 
                 // accurate enough for frame limiting purposes if some
@@ -526,14 +533,14 @@ namespace Microsoft.Xna.Framework
 
             // http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.gametime.isrunningslowly.aspx
             // Calculate IsRunningSlowly for the fixed time step, but only when the accumulated time
-            // exceeds the target time.
+            // exceeds the target time, and we haven't slept.
+            _gameTime.IsRunningSlowly = (possibleToBeRunningSlowly &&
+                                        (_accumulatedElapsedTime > TargetElapsedTime));
 
             if (IsFixedTimeStep)
             {
                 _gameTime.ElapsedGameTime = TargetElapsedTime;
                 var stepCount = 0;
-
-                _gameTime.IsRunningSlowly = (_accumulatedElapsedTime > TargetElapsedTime);
 
                 // Perform as many full fixed length time steps as we can.
                 while (_accumulatedElapsedTime >= TargetElapsedTime)
@@ -555,8 +562,6 @@ namespace Microsoft.Xna.Framework
                 _gameTime.ElapsedGameTime = _accumulatedElapsedTime;
                 _gameTime.TotalGameTime += _accumulatedElapsedTime;
                 _accumulatedElapsedTime = TimeSpan.Zero;
-                // Always set the RunningSlowly flag to false here when we are in fast-as-possible mode.
-                _gameTime.IsRunningSlowly = false;
 
                 DoUpdate(_gameTime);
             }
