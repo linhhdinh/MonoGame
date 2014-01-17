@@ -423,6 +423,7 @@ namespace Microsoft.Xna.Framework
             _gameTimer.Start();
             _accumulatedElapsedTime = TimeSpan.Zero;
             _gameTime.ElapsedGameTime = TimeSpan.Zero;
+            _previousTicks = 0L;
         }
 
         public void SuppressDraw()
