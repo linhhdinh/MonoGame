@@ -213,6 +213,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
         internal protected override void GraphicsDeviceResetting()
         {
+            if (ConstantBuffers == null) return;
+
             for (var i = 0; i < ConstantBuffers.Length; i++)
                 ConstantBuffers[i].Clear();
         }
