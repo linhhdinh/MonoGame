@@ -15,7 +15,6 @@ namespace MonoGame.Tools.Pipeline
     {
         private IController _controller;
         private ImageList _treeIcons;
-        private ContextMenuStrip _contextMenu;
 
         private bool _treeUpdating;
         private bool _treeSort;
@@ -24,12 +23,11 @@ namespace MonoGame.Tools.Pipeline
         private const int FolderOpenIcon = 1;
         private const int FolderClosedIcon = 2;
         private const int ProjectIcon = 3;
-        private const string ContextMenuInclude = "Add";
-        private const string ContextMenuExclude = "Remove";
 
         private const string MonoGameContentProjectFileFilter = "MonoGame Content Build Files (*.mgcb)|*.mgcb";
         private const string XnaContentProjectFileFilter = "XNA Content Projects (*.contentproj)|*.contentproj";
 
+        public static MainView Form { get; private set; }
 
         public MainView()
         {            
@@ -55,10 +53,9 @@ namespace MonoGame.Tools.Pipeline
             _treeView.BeforeCollapse += TreeViewOnBeforeCollapse;
             _treeView.NodeMouseClick += TreeViewOnNodeMouseClick;
 
-            _contextMenu = new ContextMenuStrip();
-            _contextMenu.ItemClicked += OnContextMenuItemClicked;
+            _propertyGrid.PropertyValueChanged += OnPropertyGridPropertyValueChanged;
 
-            _propertyGrid.PropertyValueChanged += OnPropertyGridPropertyValueChanged;            
+            Form = this;
         }
 
         private void OnPropertyGridPropertyValueChanged(object s, PropertyValueChangedEventArgs e)
@@ -71,23 +68,6 @@ namespace MonoGame.Tools.Pipeline
                     _controller.OnItemModified(_propertyGrid.SelectedObject as ContentItem);
                 else
                     _controller.OnProjectModified();
-            }
-        }
-
-        private void OnContextMenuItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-            switch (e.ClickedItem.Text)
-            {
-                case ContextMenuInclude:
-                    {
-                        _controller.Include((e.ClickedItem.Tag as IProjectItem).Location);                        
-                    } break;
-                case ContextMenuExclude:
-                    {
-                        _controller.Exclude(e.ClickedItem.Tag as ContentItem);                        
-                    } break;                
-                default:
-                    throw new Exception(string.Format("Unhandled menu item text={0}", e.ClickedItem.Text));
             }
         }
 
@@ -107,23 +87,9 @@ namespace MonoGame.Tools.Pipeline
                     _treeView.SelectedNode = node;
 
                     if (node.Tag is ContentItem)
-                    {
-                        _contextMenu.Items.Clear();
-
-                        var item = _contextMenu.Items.Add(ContextMenuExclude);                        
-                        item.Tag = node.Tag;
-
-                        _contextMenu.Show(_treeView, p);
-                    }
+                        _itemContextMenu.Show(_treeView, p);
                     else
-                    {
-                        _contextMenu.Items.Clear();
-
-                        var item = _contextMenu.Items.Add(ContextMenuInclude);
-                        item.Tag = node.Tag;
-
-                        _contextMenu.Show(_treeView, p); 
-                    }                   
+                        _folderContextMenu.Show(_treeView, p);    
                 }
             }
         }
@@ -468,7 +434,7 @@ namespace MonoGame.Tools.Pipeline
             _controller.Build(false);
         }
 
-        private void RebuilMenuItemClick(object sender, EventArgs e)
+        private void RebuildMenuItemClick(object sender, EventArgs e)
         {
             _controller.Build(true);
         }
@@ -476,6 +442,12 @@ namespace MonoGame.Tools.Pipeline
         private void CleanMenuItemClick(object sender, EventArgs e)
         {
             _controller.Clean();
+        }
+
+        private void ItemRebuildMenuItemClick(object sender, EventArgs e)
+        {
+            var item = _treeView.GetSelectedContentItem();
+            _controller.RebuildItem(item);
         }
 
         private void CancelBuildMenuItemClick(object sender, EventArgs e)
@@ -534,8 +506,8 @@ namespace MonoGame.Tools.Pipeline
             _deleteMenuItem.Enabled = projectOpen;
 
             _buildMenuItem.Enabled = projectOpenAndNotBuilding;
+            _itemRebuildMenuItem.Enabled = _rebuildMenuItem.Enabled = projectOpenAndNotBuilding;
             _cleanMenuItem.Enabled = projectOpenAndNotBuilding;
-            _rebuilMenuItem.Enabled = projectOpenAndNotBuilding;
             _cancelBuildSeparator.Visible = !notBuilding;
             _cancelBuildMenuItem.Enabled = !notBuilding;
             _cancelBuildMenuItem.Visible = !notBuilding;
