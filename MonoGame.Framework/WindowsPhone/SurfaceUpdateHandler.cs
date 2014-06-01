@@ -25,12 +25,17 @@ namespace MonoGame.Framework.WindowsPhone
 
         public void Disconnect()
         {
+            if (_game == null) return;
+
             // DeviceResetting events
-            _game.graphicsDeviceManager.OnDeviceResetting(EventArgs.Empty);
+            if (_game.graphicsDeviceManager != null)
+                _game.graphicsDeviceManager.OnDeviceResetting(EventArgs.Empty);
+
             if (_game.GraphicsDevice != null)
                 _game.GraphicsDevice.OnDeviceResetting();
 
-            _game.Window.TouchPanelState.ReleaseAllTouches();
+            if (_game.Window != null && _game.Window.TouchPanelState != null)
+                _game.Window.TouchPanelState.ReleaseAllTouches();
 
             _host = null;
         }

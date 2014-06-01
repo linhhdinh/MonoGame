@@ -233,9 +233,16 @@ namespace Microsoft.Xna.Framework.Audio
 
         private SoundState PlatformGetState()
         {
-            // If no voice or no buffers queued the sound is stopped.
-            if (_voice == null || _voice.State.BuffersQueued == 0)
-                return SoundState.Stopped;
+            try
+            {
+                // If no voice or no buffers queued the sound is stopped.
+                if (_voice == null || _voice.State.BuffersQueued == 0)
+                    return SoundState.Stopped;
+            }
+            catch 
+            {
+                // Unhandled excpetion
+            }
 
             // Because XAudio2 does not actually provide if a SourceVoice is Started / Stopped
             // we have to save the "paused" state ourself.
