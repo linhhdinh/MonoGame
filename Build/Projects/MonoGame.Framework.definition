@@ -208,6 +208,7 @@
     <Compile Include="Audio\Xact\ClipEvent.cs" />
     <Compile Include="Audio\Xact\Cue.cs" />
     <Compile Include="Audio\Xact\PlayWaveEvent.cs" />
+    <Compile Include="Audio\Xact\VolumeEvent.cs" />
     <Compile Include="Audio\Xact\SoundBank.cs" />
     <Compile Include="Audio\Xact\WaveBank.cs" />
     <Compile Include="Audio\Xact\XactClip.cs" />
@@ -566,6 +567,18 @@
         <Platforms>Web</Platforms>
     </Compile>
     <Compile Include="Graphics\TextureCollection.cs" />
+    <Compile Include="Graphics\TextureCollection.DirectX.cs">
+        <Platforms>Windows,Windows8,WindowsPhone</Platforms>
+    </Compile>
+    <Compile Include="Graphics\TextureCollection.OpenGL.cs">
+        <Platforms>Angle,WindowsGL,Linux,MacOS,iOS,Android,Ouya</Platforms>
+    </Compile>
+    <Compile Include="Graphics\TextureCollection.PSM.cs">
+        <Platforms>PSMobile</Platforms>
+    </Compile>
+    <Compile Include="Graphics\TextureCollection.Web.cs">
+        <Platforms>Web</Platforms>
+    </Compile>
     <Compile Include="Graphics\Texture.cs" />
     <Compile Include="Graphics\Texture.DirectX.cs">
         <Platforms>Windows,Windows8,WindowsPhone</Platforms>
